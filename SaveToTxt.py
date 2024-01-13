@@ -67,10 +67,41 @@ def updated_save_to_file(class_data):
         for entry in class_data:
             line = f"| {entry['title']:<29} | {entry['instructor']:<29} | {entry['day']:<30} | {entry['time']:<30} | {entry['campus']:<30} | {entry['building_and_room']:<30} |"
             file.write(line + "\n")
+            
+#this is where the website searches for data
+def save_to_file(class_data):
+    with open("data.txt", "w") as file:
+        # Writing the header
+        file.write("Title:Instructor:Day:Time:Campus:Building & Room\n")
+
+        # Writing each entry
+        for entry in class_data:
+            line = f"{entry['title']}:{entry['instructor']}:{entry['day']}:{entry['time']}:{entry['campus']}:{entry['building_and_room']}\n"
+            file.write(line)
+
 
 
 # Main Execution
 if __name__ == "__main__":
     course_data = fetch_course_data()
+    print("Fetched course data:", course_data)  # Diagnostic print
+
     class_data = updated_parse_class_details(course_data)
+    print("Parsed class data:", class_data)  # Diagnostic print
+
+    print("Calling updated_save_to_file...")  # Diagnostic print
     updated_save_to_file(class_data)
+
+    print("Calling save_to_file...")  # Diagnostic print
+    save_to_file(class_data)
+
+
+
+# # Main Execution
+# if __name__ == "__main__":
+#     course_data = fetch_course_data()
+#     class_data = updated_parse_class_details(course_data)
+#     updated_save_to_file(class_data)
+#     save_to_file(class_data)
+
+#^this just works
