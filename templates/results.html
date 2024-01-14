@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Results</title>
+</head>
+<body>
+    <h1>Search Results</h1>
+    <ul>
+    {% for item in data %}
+        <li>{{ item.title }} - {{ item.instructor }} - {{ item.day }} - {{ item.time }} - {{ item.campus }} - {{ item.building_room }}</li>
+    {% endfor %}
+    </ul>
+</
+body>
+
+</html>
