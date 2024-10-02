@@ -1,31 +1,38 @@
 from flask import Flask, request, render_template
+import csv
+import os
 
 app = Flask(__name__)
+
+# Function to get the path of the CSV file in the same folder as the script
+def get_csv_file_path():
+    script_directory = os.path.dirname(os.path.abspath(__file__))  # Get the directory of the script
+    return os.path.join(script_directory, 'classes.csv')  # Join the directory with 'classes.csv'
+
+# Function to read data from the CSV file
+def read_data_file():
+    data = []
+    csv_file_path = get_csv_file_path()  # Get the full path to 'classes.csv'
+    with open(csv_file_path, 'r') as file:
+        reader = csv.DictReader(file)  # Using DictReader to map CSV headers to dictionary keys
+        for row in reader:
+            data.append({
+                'title': row['Title'].strip(),
+                'instructor': row['Instructor'].strip(),
+                'day': row['Day'].strip(),
+                'time': row['Time'].strip(),
+                'campus': row['Campus'].strip(),
+                'building_room': row['Building & Room'].strip()
+            })
+    return data
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-def read_data_file():
-    data = []
-    with open('data.txt', 'r') as file:
-        next(file)  # Skip the header line
-        for line in file:
-            parts = line.strip().split(':::')  # Splitting using ':::' as delimiter
-            if len(parts) == 6:
-                data.append({
-                    'title': parts[0].strip(),
-                    'instructor': parts[1].strip(),
-                    'day': parts[2].strip(),
-                    'time': parts[3].strip(),
-                    'campus': parts[4].strip(),
-                    'building_room': parts[5].strip()
-                })
-    return data
-
 @app.route('/search', methods=['POST'])
 def search():
-    # Get form data, no need to convert to lower here, will be done in comparison
+    # Get form data from the search form
     title = request.form.get('title', '')
     instructor = request.form.get('instructor', '')
     day = request.form.get('day', '')
@@ -33,7 +40,7 @@ def search():
     campus = request.form.get('campus', '')
     building_room = request.form.get('building_room', '')
 
-    # Read the data from file
+    # Read the data from the CSV file
     all_data = read_data_file()
 
     # Filter the data based on the form input, case insensitive
@@ -43,8 +50,7 @@ def search():
                      (day.lower() == d['day'].lower() or not day) and
                      (time.lower() == d['time'].lower() or not time) and
                      (campus.lower() == d['campus'].lower() or not campus) and
-                     (building_room.lower() in d['building_room'].lower() or not building_room)] #replaced == with in
-
+                     (building_room.lower() in d['building_room'].lower() or not building_room)]
 
     # Debug print to check what is being sent to the template
     print("Filtered data:", filtered_data)
