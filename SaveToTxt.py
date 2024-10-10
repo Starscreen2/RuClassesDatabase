@@ -45,8 +45,8 @@ def updated_parse_class_details(data):
             instructor_name = section.get("instructorsText", "Unknown Instructor")
             for meeting in section.get("meetingTimes", []):
                 day = day_mapping.get(meeting.get("meetingDay", ""), "")
-                start_time = meeting.get("startTimeMilitary", "")
-                end_time = meeting.get("endTimeMilitary", "")
+                start_time = convert_time(meeting.get("startTimeMilitary", ""))
+                end_time = convert_time(meeting.get("endTimeMilitary", ""))
                 campus = campus_mapping.get(meeting.get("campusName", "").lower(), meeting.get("campusName", ""))
                 building_room = f"{meeting.get('buildingCode', '')}-{meeting.get('roomNumber', '')}"
                 
@@ -78,18 +78,28 @@ def updated_save_to_csv(class_data):
     print(f"Data successfully saved to {file_path}")
 
 def convert_time(time_str):
-    parts = time_str.split(' - ')
-    new_parts = []
+    if not time_str:
+        return ""
+    hour = int(time_str[:2])
+    minute = int(time_str[2:])
+    am_pm = "am" if hour < 12 else "pm"
+    hour = hour % 12
+    hour = 12 if hour == 0 else hour
+    return f"{hour}:{minute:02d}{am_pm}"
 
-    for part in parts:
-        hour = int(part[:2])
-        minute = int(part[2:])
-        am_pm = "am" if hour < 12 else "pm"
-        hour = hour % 12
-        hour = 12 if hour == 0 else hour
-        new_parts.append(f"{hour}:{minute:02d}{am_pm}")
-
-    return " - ".join(new_parts)
+# def convert_time_military(time_str):
+#     parts = time_str.split(' - ')
+#     new_parts = []
+#
+#     for part in parts:
+#         hour = int(part[:2])
+#         minute = int(part[2:])
+#         am_pm = "am" if hour < 12 else "pm"
+#         hour = hour % 12
+#         hour = 12 if hour == 0 else hour
+#         new_parts.append(f"{hour}:{minute:02d}{am_pm}")
+#
+#     return " - ".join(new_parts)
 
 def update_times_in_file():
     with open('data.txt', 'r') as file:
@@ -98,25 +108,26 @@ def update_times_in_file():
     with open('data.txt', 'w') as file:
         for line in lines:
             if "Title:::Instructor" in line:
-                file.write(line)  
+                file.write(line)
                 continue
 
             parts = line.strip().split(':::')
             if len(parts) == 6:
-                parts[3] = convert_time(parts[3])  
+                parts[3] = convert_time(parts[3])
                 updated_line = ':::'.join(parts)
                 file.write(updated_line + '\n')
             else:
-                file.write(line)  
+                file.write(line)
+
 
 if __name__ == "__main__":
     course_data = fetch_course_data()
-    print("Fetched course data:", course_data)  
+    print("Fetched course data:", course_data)
 
     class_data = updated_parse_class_details(course_data)
-    print("Parsed class data:", class_data)  
+    print("Parsed class data:", class_data)
 
-    print("Calling updated_save_to_csv...")  
-    updated_save_to_csv(class_data)  
+    print("Calling updated_save_to_csv...")
+    updated_save_to_csv(class_data) 
 
     update_times_in_file()
