@@ -9,11 +9,22 @@ courses = response.json()
 # Sort courses by a key (here we use "courseString", but you can change it)
 sorted_courses = sorted(courses, key=lambda c: c.get("courseString", ""))
 
+# Define day mapping
+day_mapping = {
+    "M": "Monday",
+    "T": "Tuesday",
+    "W": "Wednesday",
+    "H": "Thursday",  # H is probably Thursday
+    "F": "Friday",
+    "S": "Saturday",
+    "Su": "Sunday"
+}
+
 # Open a CSV file for writing
 with open("courses_export.csv", "w", newline="") as csvfile:
     writer = csv.writer(csvfile)
     
-    # Updated header row with new "Time" column inserted before "Meeting Times"
+    # Updated header row with new "Time" and "Weekdays" columns inserted before "Meeting Times"
     writer.writerow([
         "Course Code",
         "Title",
@@ -29,6 +40,7 @@ with open("courses_export.csv", "w", newline="") as csvfile:
         "Status",
         "Comments",
         "Time",             # <-- new column
+        "Weekdays",         # <-- new column
         "Meeting Times"
     ])
     
@@ -52,12 +64,14 @@ with open("courses_export.csv", "w", newline="") as csvfile:
         
         # For each section in the course, write a row
         for section in course.get("sections", []):
-            # Compute extra "Time" column using the first meeting time (if exists)
+            # Compute extra "Time" and "Weekdays" columns using the first meeting time (if exists)
             if section.get("meetingTimes"):
                 first_meeting = section.get("meetingTimes")[0]
                 extra_time = f"{first_meeting.get('startTimeMilitary', 'N/A')}-{first_meeting.get('endTimeMilitary', 'N/A')}"
+                weekdays = day_mapping.get(first_meeting.get('meetingDay', ''), 'N/A')
             else:
                 extra_time = ""
+                weekdays = ""
             
             section_info = [
                 section.get("number", ""),
@@ -65,6 +79,7 @@ with open("courses_export.csv", "w", newline="") as csvfile:
                 section.get("openStatusText", ""),
                 section.get("commentsText", ""),
                 extra_time,   # <-- extra column inserted here
+                weekdays,     # <-- extra column inserted here
                 # Format meeting times (concatenate all meeting times in the section)
                 "; ".join([
                     f"{meeting.get('meetingDay', '')}: {meeting.get('startTimeMilitary', 'N/A')}-{meeting.get('endTimeMilitary', 'N/A')} at {meeting.get('buildingCode', 'N/A')} {meeting.get('roomNumber', 'N/A')} ({meeting.get('meetingModeDesc', 'N/A')})"
