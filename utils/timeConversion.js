@@ -13,11 +13,3 @@ function convertTime(timeStr) {
     
     return `${hour}:${minute} ${suffix}`;
 }
-
-// Example usage:
-console.log(convertTime("00:00")); // Expected output: "12:00 AM"
-console.log(convertTime("12:00")); // Expected output: "12:00 PM"
-console.log(convertTime("14:30")); // Expected output: "2:30 PM"
-
-// ...existing code or exports...
-module.exports = { convertTime };
